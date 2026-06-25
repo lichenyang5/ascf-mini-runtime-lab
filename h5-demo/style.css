@@ -1,0 +1,161 @@
+/* ASCF Mini Runtime Lab — h5-demo/style.css
+   现代移动端工作台风格：浅灰背景、白色卡片、圆角、蓝色主色，无花哨动画。 */
+
+:root {
+  --bg: #f4f5f7;
+  --card-bg: #ffffff;
+  --border: #e6e8eb;
+  --text: #1f2329;
+  --text-weak: #646a73;
+  --primary: #3370ff;
+  --primary-hover: #245bdb;
+  --danger: #f54a45;
+  --danger-hover: #d93832;
+  --ok: #1fa971;
+  --code-bg: #f7f8fa;
+  --radius: 16px;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  line-height: 1.5;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+
+.app-header { margin-bottom: 20px; }
+.app-title { margin: 0 0 6px; font-size: 24px; font-weight: 700; }
+.app-subtitle { margin: 0; color: var(--text-weak); font-size: 14px; }
+.app-subtitle code {
+  font-family: var(--mono);
+  background: var(--code-bg);
+  padding: 1px 6px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+
+.card-title { margin: 0 0 12px; font-size: 15px; font-weight: 600; }
+
+.field { display: block; margin-bottom: 14px; }
+.field-label { display: block; font-size: 13px; color: var(--text-weak); margin-bottom: 6px; }
+.field-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--text);
+  outline: none;
+}
+.field-input:focus { border-color: var(--primary); }
+
+.button-row { display: flex; flex-wrap: wrap; gap: 10px; }
+
+.btn {
+  appearance: none;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--text);
+  font-size: 14px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.btn:hover { background: #f2f3f5; }
+.btn:active { transform: translateY(1px); }
+
+.btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+
+.btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+.btn-danger:hover { background: var(--danger-hover); border-color: var(--danger-hover); }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 720px) { .grid-2 { grid-template-columns: 1fr; } }
+
+.json-view {
+  margin: 0;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 96px;
+  overflow-x: auto;
+}
+
+.debug-log { display: flex; flex-direction: column; gap: 10px; }
+.empty-hint { margin: 0; color: var(--text-weak); font-size: 13px; }
+
+.log-item {
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #fff;
+}
+.log-ok { border-left-color: var(--ok); }
+.log-error { border-left-color: var(--danger); }
+
+.log-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.log-id { font-family: var(--mono); color: var(--text-weak); }
+.log-action { font-weight: 600; }
+.log-duration { color: var(--text-weak); margin-left: auto; font-family: var(--mono); }
+
+.log-pill {
+  font-size: 12px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-family: var(--mono);
+}
+.pill-ok { background: rgba(31, 169, 113, .12); color: var(--ok); }
+.pill-error { background: rgba(245, 74, 69, .12); color: var(--danger); }
+
+.log-json {
+  margin: 0;
+  background: var(--code-bg);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: var(--mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+}
+
+.app-footer {
+  margin-top: 24px;
+  text-align: center;
+  color: var(--text-weak);
+  font-size: 12px;
+}

@@ -41,7 +41,7 @@ H5 Button
 
 ## 2. 阶段计划（Stage 0 → Stage 7）
 
-### Stage 0 · 项目初始化 — 🔄 进行中
+### Stage 0 · 项目初始化 — ✅ 已完成
 
 - **目标**：初始化仓库、确定目录结构、写清楚「项目是什么 / 后续怎么做」。
 - **产出**：`README.md`、`skill.md`、`docs/00-project-roadmap.md`、`docs/01-why-jsbridge.md`、`docs/diagrams/runtime-architecture.mmd`。
@@ -50,10 +50,11 @@ H5 Button
   - skill.md 能约束后续开发；
   - 本路线图能说明阶段计划。
 
-### Stage 1 · H5 Mock 跑通 — ⏳
+### Stage 1 · H5 Mock 跑通 — ✅ 已完成
 
 - **目标**：`h5-demo/index.html` + `bridge.js` + `style.css`，模拟 `window.ascfBridge.send`，点击按钮返回 mock response。
 - **验收**：浏览器打开 `index.html`，点 `toast.show` 显示 success，点 `unknown.action` 显示 `UNKNOWN_ACTION`。
+- **进展**：已实现 `toast.show` / `device.info` / `unknown.action` 三个调用；统一 request/response 协议、`PARAM_ERROR`（toast 文案留空）与 `UNKNOWN_ACTION` 错误分支；Debug Log 记录 request / response / duration / code。逻辑集中在 `h5-demo/bridge.js`，纯前端、无依赖、可直接用浏览器打开。
 
 ### Stage 2 · Bridge Core — ⏳
 
@@ -91,8 +92,8 @@ H5 Button
 
 | 任务 | 内容 | 状态 |
 | --- | --- | --- |
-| **Task 1** | 初始化文档骨架：`README.md` / `docs/00-project-roadmap.md` / `docs/01-why-jsbridge.md` / `docs/diagrams/runtime-architecture.mmd` | 🔄 进行中 |
-| Task 2 | 创建 H5 Demo：`h5-demo/index.html` / `bridge.js` / `style.css`，假的 `window.ascfBridge.send` | ⏳ |
+| **Task 1** | 初始化文档骨架：`README.md` / `docs/00-project-roadmap.md` / `docs/01-why-jsbridge.md` / `docs/diagrams/runtime-architecture.mmd` | ✅ 已完成 |
+| Task 2 | 创建 H5 Demo：`h5-demo/index.html` / `bridge.js` / `style.css`，假的 `window.ascfBridge.send` | ✅ 已完成 |
 | Task 3 | 抽出 Bridge Core：`protocol` / `registry` / `dispatcher` | ⏳ |
 | Task 4 | 加 Debug Log：每次请求/响应生成日志、记录耗时、页面展示 | ⏳ |
 | Task 5 | 写第一篇文档：完善 `docs/01-why-jsbridge.md` | ⏳ |

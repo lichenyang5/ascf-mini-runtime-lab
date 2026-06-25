@@ -1,3 +1,0 @@
-# H5 Demo Layer（规划中 / Stage 1）
-# index.html / bridge.js / style.css —— 模拟 window.ascfBridge.send，点击按钮触发调用链路。
-# 占位文件，仅用于保留目录；实现该模块后可删除。

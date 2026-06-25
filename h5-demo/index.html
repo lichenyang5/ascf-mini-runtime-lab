@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASCF Mini Runtime Lab</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <main class="app">
+    <header class="app-header">
+      <h1 class="app-title">ASCF Mini Runtime Lab</h1>
+      <p class="app-subtitle">
+        H5 通过 <code>window.ascfBridge.send</code> 调用 Native Mock Ability
+      </p>
+    </header>
+
+    <!-- 控制区：三个能力调用按钮 -->
+    <section class="card">
+      <h2 class="card-title">调用 Native Mock 能力</h2>
+      <label class="field" for="toast-message">
+        <span class="field-label">toast.show 文案</span>
+        <input
+          id="toast-message"
+          class="field-input"
+          type="text"
+          value="Hello ASCF Mini Runtime"
+          placeholder="留空并点击 toast.show 可触发 PARAM_ERROR"
+        />
+      </label>
+      <div class="button-row">
+        <button id="btn-toast" class="btn btn-primary" type="button">调用 toast.show</button>
+        <button id="btn-device" class="btn" type="button">调用 device.info</button>
+        <button id="btn-unknown" class="btn btn-danger" type="button">调用 unknown.action</button>
+      </div>
+    </section>
+
+    <!-- 展示区：Request / Response 并排 -->
+    <div class="grid-2">
+      <section class="card">
+        <h2 class="card-title">Request</h2>
+        <pre id="request-view" class="json-view">// 点击上方按钮后，这里展示本次发送的 request</pre>
+      </section>
+      <section class="card">
+        <h2 class="card-title">Response</h2>
+        <pre id="response-view" class="json-view">// 点击上方按钮后，这里展示 Native Mock 返回的 response</pre>
+      </section>
+    </div>
+
+    <!-- 调试区：每次调用追加一条记录 -->
+    <section class="card">
+      <h2 class="card-title">Debug Log</h2>
+      <div id="debug-log" class="debug-log">
+        <p class="empty-hint">暂无调用记录。每次调用会在这里追加一条 request / response / duration / code。</p>
+      </div>
+    </section>
+
+    <footer class="app-footer">
+      纯前端 Mock Demo · 不调用任何真实系统能力 · 仅用于理解 H5 → Bridge → Mock Ability → Response 闭环
+    </footer>
+  </main>
+
+  <!-- 经典 script（非 ES module），可直接用浏览器打开 file:// 运行，无需任何构建 -->
+  <script src="./bridge.js"></script>
+</body>
+</html>
