@@ -56,10 +56,11 @@ H5 Button
 - **验收**：浏览器打开 `index.html`，点 `toast.show` 显示 success，点 `unknown.action` 显示 `UNKNOWN_ACTION`。
 - **进展**：已实现 `toast.show` / `device.info` / `unknown.action` 三个调用；统一 request/response 协议、`PARAM_ERROR`（toast 文案留空）与 `UNKNOWN_ACTION` 错误分支；Debug Log 记录 request / response / duration / code。逻辑集中在 `h5-demo/bridge.js`，纯前端、无依赖、可直接用浏览器打开。
 
-### Stage 2 · Bridge Core — ⏳
+### Stage 2 · Bridge Core — ✅ 已完成
 
 - **目标**：实现协议类型、dispatcher、registry、error response。
 - **验收**：action 存在调用成功；不存在返回 `UNKNOWN_ACTION`；params 非法返回 `PARAM_ERROR`；所有 response 格式统一。
+- **进展**：已把 Stage 1 的单文件逻辑拆为分层架构——`bridge-core/`（protocol / errors / registry / dispatcher）+ `ability-plugins/`（toast / device）。`h5-demo/bridge.js` 退化为组装层。采用经典 script + 全局命名空间（`window.BridgeCore` / `window.AbilityPlugins`），保持浏览器直接打开 `index.html` 即可运行。配套文档：[01](01-why-jsbridge.md) 之后新增 [02](02-bridge-protocol.md) / [03](03-ability-registry.md) / [04](04-dispatch-flow.md)。
 
 ### Stage 3 · Ability Plugins — ⏳
 
@@ -94,7 +95,7 @@ H5 Button
 | --- | --- | --- |
 | **Task 1** | 初始化文档骨架：`README.md` / `docs/00-project-roadmap.md` / `docs/01-why-jsbridge.md` / `docs/diagrams/runtime-architecture.mmd` | ✅ 已完成 |
 | Task 2 | 创建 H5 Demo：`h5-demo/index.html` / `bridge.js` / `style.css`，假的 `window.ascfBridge.send` | ✅ 已完成 |
-| Task 3 | 抽出 Bridge Core：`protocol` / `registry` / `dispatcher` | ⏳ |
+| Task 3 | 抽出 Bridge Core：`protocol` / `registry` / `dispatcher` | ✅ 已完成 |
 | Task 4 | 加 Debug Log：每次请求/响应生成日志、记录耗时、页面展示 | ⏳ |
 | Task 5 | 写第一篇文档：完善 `docs/01-why-jsbridge.md` | ⏳ |
 
@@ -109,9 +110,9 @@ H5 Button
 | 文档 | 主题 | 对应阶段 | 状态 |
 | --- | --- | --- | --- |
 | `01-why-jsbridge.md` | 为什么需要 JSBridge | Stage 1 | 🔄 骨架已建 |
-| `02-bridge-protocol.md` | 协议设计 | Stage 2 | ⏳ |
-| `03-ability-registry.md` | 能力注册表 | Stage 2/3 | ⏳ |
-| `04-dispatch-flow.md` | 分发流程 | Stage 2 | ⏳ |
+| `02-bridge-protocol.md` | 协议设计 | Stage 2 | ✅ |
+| `03-ability-registry.md` | 能力注册表 | Stage 2/3 | ✅ |
+| `04-dispatch-flow.md` | 分发流程 | Stage 2 | ✅ |
 | `05-error-handling.md` | 错误处理 | Stage 2 | ⏳ |
 | `06-offline-package.md` | 离线包 | Stage 6 | ⏳ |
 | `diagrams/bridge-sequence.mmd` | 调用时序图 | Stage 2/4 | ⏳ |

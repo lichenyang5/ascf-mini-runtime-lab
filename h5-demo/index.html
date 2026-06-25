@@ -60,7 +60,14 @@
     </footer>
   </main>
 
-  <!-- 经典 script（非 ES module），可直接用浏览器打开 file:// 运行，无需任何构建 -->
+  <!-- 经典 script（非 ES module），可直接用浏览器打开 file:// 运行，无需任何构建。
+       Stage 2：按依赖顺序加载 bridge-core 各层与 ability 插件，最后由 bridge.js 组装。 -->
+  <script src="../bridge-core/errors/bridgeErrors.js"></script>
+  <script src="../bridge-core/protocol/bridgeProtocol.js"></script>
+  <script src="../bridge-core/registry/abilityRegistry.js"></script>
+  <script src="../bridge-core/dispatcher/bridgeDispatcher.js"></script>
+  <script src="../ability-plugins/toast/toastAbility.js"></script>
+  <script src="../ability-plugins/device/deviceAbility.js"></script>
   <script src="./bridge.js"></script>
 </body>
 </html>

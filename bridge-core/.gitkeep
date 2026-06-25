@@ -1,3 +1,0 @@
-# Bridge Core（规划中 / Stage 2）
-# protocol / registry / dispatcher / errors —— JSBridge 协议、能力注册表、分发中枢、统一错误码。
-# 占位文件，仅用于保留目录；实现该模块后可删除。
