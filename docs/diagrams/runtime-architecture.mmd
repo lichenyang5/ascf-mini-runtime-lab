@@ -1,0 +1,56 @@
+%% ASCF Mini Runtime Lab — 运行时分层架构图
+%% 渲染方式：VS Code Mermaid 插件 / https://mermaid.live / GitHub Markdown
+%% 说明：实线表示主调用链路（H5 -> Native -> H5），虚线表示调试观测旁路。
+
+flowchart TD
+    subgraph H5["H5 Demo Layer · h5-demo/"]
+        BTN["页面按钮 / 用户交互"]
+        SEND["window.ascfBridge.send(request)"]
+        CB["H5 callback / Promise result"]
+    end
+
+    subgraph CORE["Bridge Core · bridge-core/"]
+        PROTO["Bridge Protocol<br/>校验 request · 统一 response · 错误码"]
+        DISP["Bridge Dispatcher<br/>按 action 查找并调用 ability"]
+        REG["Ability Registry<br/>注册 · 查找 · 列出已注册 action"]
+    end
+
+    subgraph ABILITY["Ability Plugin Layer · ability-plugins/"]
+        TOAST["toast.show"]
+        STORAGE["storage.set / storage.get"]
+        DEVICE["device.info"]
+        NETWORK["network.status"]
+    end
+
+    DEBUG["Debug Panel Layer<br/>记录 request · response · duration · code/msg"]
+
+    %% ---- 主链路：请求向下 ----
+    BTN --> SEND
+    SEND -->|request| PROTO
+    PROTO -->|合法 request| DISP
+    DISP -->|按 action 查找| REG
+    REG -->|命中 ability| DISP
+    DISP --> TOAST
+    DISP --> STORAGE
+    DISP --> DEVICE
+    DISP --> NETWORK
+
+    %% ---- 主链路：响应向上 ----
+    TOAST -->|data| DISP
+    STORAGE -->|data| DISP
+    DEVICE -->|data| DISP
+    NETWORK -->|data| DISP
+    DISP -->|response| PROTO
+    PROTO -->|response| CB
+
+    %% ---- 错误链路 ----
+    REG -.->|未注册| ERR["统一错误响应<br/>404 UNKNOWN_ACTION"]
+    PROTO -.->|字段非法| ERR2["统一错误响应<br/>400 PARAM_ERROR"]
+    ERR -.-> PROTO
+    ERR2 -.-> CB
+
+    %% ---- 调试观测旁路 ----
+    SEND -.-> DEBUG
+    PROTO -.-> DEBUG
+    DISP -.-> DEBUG
+    CB -.-> DEBUG
