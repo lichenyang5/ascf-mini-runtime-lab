@@ -15,23 +15,62 @@
       </p>
     </header>
 
-    <!-- 控制区：三个能力调用按钮 -->
+    <!-- 控制区：按能力分类的调用按钮 -->
     <section class="card">
       <h2 class="card-title">调用 Native Mock 能力</h2>
-      <label class="field" for="toast-message">
-        <span class="field-label">toast.show 文案</span>
-        <input
-          id="toast-message"
-          class="field-input"
-          type="text"
-          value="Hello ASCF Mini Runtime"
-          placeholder="留空并点击 toast.show 可触发 PARAM_ERROR"
-        />
-      </label>
-      <div class="button-row">
-        <button id="btn-toast" class="btn btn-primary" type="button">调用 toast.show</button>
-        <button id="btn-device" class="btn" type="button">调用 device.info</button>
-        <button id="btn-unknown" class="btn btn-danger" type="button">调用 unknown.action</button>
+
+      <!-- 基础能力 -->
+      <div class="group">
+        <div class="group-label">基础能力</div>
+        <label class="field" for="toast-message">
+          <span class="field-label">toast.show 文案（清空可触发 PARAM_ERROR）</span>
+          <input id="toast-message" class="field-input" type="text" value="Hello ASCF Mini Runtime" />
+        </label>
+        <div class="button-row">
+          <button id="btn-toast" class="btn btn-primary" type="button">调用 toast.show</button>
+          <button id="btn-device" class="btn" type="button">调用 device.info</button>
+        </div>
+      </div>
+
+      <!-- 存储能力 -->
+      <div class="group">
+        <div class="group-label">存储能力</div>
+        <div class="field-row">
+          <label class="field" for="storage-key">
+            <span class="field-label">key</span>
+            <input id="storage-key" class="field-input" type="text" value="username" />
+          </label>
+          <label class="field" for="storage-value">
+            <span class="field-label">value</span>
+            <input id="storage-value" class="field-input" type="text" value="lichen" />
+          </label>
+        </div>
+        <div class="button-row">
+          <button id="btn-storage-set" class="btn btn-primary" type="button">调用 storage.set</button>
+          <button id="btn-storage-get" class="btn" type="button">调用 storage.get</button>
+        </div>
+      </div>
+
+      <!-- 系统能力 Mock -->
+      <div class="group">
+        <div class="group-label">系统能力 Mock</div>
+        <label class="field" for="clipboard-text">
+          <span class="field-label">clipboard.write 文本</span>
+          <input id="clipboard-text" class="field-input" type="text" value="hello bridge" />
+        </label>
+        <div class="button-row">
+          <button id="btn-network" class="btn" type="button">调用 network.status</button>
+          <button id="btn-clipboard" class="btn" type="button">调用 clipboard.write</button>
+        </div>
+      </div>
+
+      <!-- 错误场景 -->
+      <div class="group">
+        <div class="group-label">错误场景</div>
+        <div class="button-row">
+          <button id="btn-unknown" class="btn btn-danger" type="button">调用 unknown.action</button>
+          <button id="btn-param-error" class="btn btn-danger" type="button">PARAM_ERROR（storage.set 缺 value）</button>
+        </div>
       </div>
     </section>
 
@@ -61,13 +100,17 @@
   </main>
 
   <!-- 经典 script（非 ES module），可直接用浏览器打开 file:// 运行，无需任何构建。
-       Stage 2：按依赖顺序加载 bridge-core 各层与 ability 插件，最后由 bridge.js 组装。 -->
+       按依赖顺序加载 bridge-core 各层与 ability 插件，最后由 bridge.js 组装。
+       新增 ability 时，记得在此追加一行 <script>（无打包器，靠顺序加载）。 -->
   <script src="../bridge-core/errors/bridgeErrors.js"></script>
   <script src="../bridge-core/protocol/bridgeProtocol.js"></script>
   <script src="../bridge-core/registry/abilityRegistry.js"></script>
   <script src="../bridge-core/dispatcher/bridgeDispatcher.js"></script>
   <script src="../ability-plugins/toast/toastAbility.js"></script>
   <script src="../ability-plugins/device/deviceAbility.js"></script>
+  <script src="../ability-plugins/storage/storageAbility.js"></script>
+  <script src="../ability-plugins/network/networkAbility.js"></script>
+  <script src="../ability-plugins/clipboard/clipboardAbility.js"></script>
   <script src="./bridge.js"></script>
 </body>
 </html>

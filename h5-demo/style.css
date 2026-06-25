@@ -69,6 +69,21 @@ body {
 
 .button-row { display: flex; flex-wrap: wrap; gap: 10px; }
 
+/* 按能力分类的分组 */
+.group { margin-bottom: 16px; }
+.group + .group { border-top: 1px solid var(--border); padding-top: 14px; }
+.group:last-child { margin-bottom: 0; }
+.group-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-weak);
+  letter-spacing: .02em;
+  margin-bottom: 8px;
+}
+.field-row { display: flex; gap: 12px; }
+.field-row .field { flex: 1; margin-bottom: 14px; }
+@media (max-width: 520px) { .field-row { flex-direction: column; gap: 0; } }
+
 .btn {
   appearance: none;
   border: 1px solid var(--border);

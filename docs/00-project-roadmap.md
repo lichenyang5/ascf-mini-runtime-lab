@@ -62,10 +62,11 @@ H5 Button
 - **验收**：action 存在调用成功；不存在返回 `UNKNOWN_ACTION`；params 非法返回 `PARAM_ERROR`；所有 response 格式统一。
 - **进展**：已把 Stage 1 的单文件逻辑拆为分层架构——`bridge-core/`（protocol / errors / registry / dispatcher）+ `ability-plugins/`（toast / device）。`h5-demo/bridge.js` 退化为组装层。采用经典 script + 全局命名空间（`window.BridgeCore` / `window.AbilityPlugins`），保持浏览器直接打开 `index.html` 即可运行。配套文档：[01](01-why-jsbridge.md) 之后新增 [02](02-bridge-protocol.md) / [03](03-ability-registry.md) / [04](04-dispatch-flow.md)。
 
-### Stage 3 · Ability Plugins — ⏳
+### Stage 3 · Ability Plugins — ✅ 已完成
 
 - **目标**：`toast.show`、`storage.set`、`storage.get`、`device.info`、`network.status`。
 - **验收**：每个 ability 独立文件 + 说明文档 + 错误场景。
+- **进展**：在 Stage 2 分层上新增 `storage.set` / `storage.get`（localStorage Mock）、`network.status`、`clipboard.write`，连同既有 `toast.show` / `device.info` 共 6 个能力。全部只通过「新建 ability 文件 + 在组装层 `register`」接入，dispatcher / protocol / registry 未改动。`index.html` 按能力分类（基础 / 存储 / 系统 Mock / 错误场景）。配套文档 [05-ability-plugins.md](05-ability-plugins.md)。
 
 ### Stage 4 · Debug Panel — ⏳
 
@@ -113,7 +114,7 @@ H5 Button
 | `02-bridge-protocol.md` | 协议设计 | Stage 2 | ✅ |
 | `03-ability-registry.md` | 能力注册表 | Stage 2/3 | ✅ |
 | `04-dispatch-flow.md` | 分发流程 | Stage 2 | ✅ |
-| `05-error-handling.md` | 错误处理 | Stage 2 | ⏳ |
+| `05-ability-plugins.md` | 能力插件化（含常见错误） | Stage 3 | ✅ |
 | `06-offline-package.md` | 离线包 | Stage 6 | ⏳ |
 | `diagrams/bridge-sequence.mmd` | 调用时序图 | Stage 2/4 | ⏳ |
 

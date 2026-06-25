@@ -1,19 +1,18 @@
 'use strict';
 
 /*
- * ASCF Mini Runtime Lab — h5-demo/bridge.js（Stage 2：组装层 / H5 Demo Layer）
+ * ASCF Mini Runtime Lab — h5-demo/bridge.js（组装层 / H5 Demo Layer）
  *
- * Stage 1 时所有逻辑都堆在这个文件；Stage 2 已把核心拆到 bridge-core 与 ability-plugins：
- *
+ * 分层（Stage 2 起）：
  *   H5 Demo Layer（本文件）
  *     -> Bridge Protocol     bridge-core/protocol/bridgeProtocol.js
  *     -> Bridge Dispatcher   bridge-core/dispatcher/bridgeDispatcher.js
  *     -> Ability Registry    bridge-core/registry/abilityRegistry.js
- *     -> Ability Plugin      ability-plugins/<toast|device>/...
+ *     -> Ability Plugin      ability-plugins/<toast|device|storage|network|clipboard>/...
  *     -> Unified Response    protocol.createSuccessResponse / createErrorResponse
  *
  * 本文件只负责：构造 request、组装 registry、暴露 window.ascfBridge.send、记录 Debug Log、绑定 UI。
- * 不再包含任何具体能力的业务逻辑——业务都在 ability-plugins 里。
+ * 不包含任何具体能力的业务逻辑——业务都在 ability-plugins 里。
  */
 (function (global) {
   // 依赖 bridge-core / ability-plugins 已先于本文件加载（见 index.html 的 script 顺序）
@@ -22,8 +21,25 @@
 
   /* ---- 1. 组装：创建注册表并注册能力 ---- */
   var registry = new BridgeCore.AbilityRegistry();
-  registry.register(AbilityPlugins.toastAbility.action, AbilityPlugins.toastAbility);
-  registry.register(AbilityPlugins.deviceAbility.action, AbilityPlugins.deviceAbility);
+
+  // 支持「单个 ability」或「一个文件导出的 ability 数组」（如 storage）
+  function registerAll(items) {
+    items.forEach(function (item) {
+      if (!item) return; // 容错：某 ability 脚本未加载时跳过，不连累其他能力
+      var list = Array.isArray(item) ? item : [item];
+      list.forEach(function (ability) {
+        if (ability && ability.action) registry.register(ability.action, ability);
+      });
+    });
+  }
+
+  registerAll([
+    AbilityPlugins.toastAbility,        // toast.show
+    AbilityPlugins.deviceAbility,       // device.info
+    AbilityPlugins.storageAbilities,    // storage.set + storage.get（数组）
+    AbilityPlugins.networkAbility,      // network.status
+    AbilityPlugins.clipboardAbility     // clipboard.write
+  ]);
 
   /* ---- 2. H5 侧请求构造（id / version 由 H5 负责生成）---- */
   var PROTOCOL_VERSION = '1.0.0';
@@ -119,7 +135,7 @@
       '<span class="log-pill ' + (ok ? 'pill-ok' : 'pill-error') + '">' + entry.code + ' ' + entry.msg + '</span>' +
       '<span class="log-duration">' + entry.duration + ' ms</span>';
 
-    // body 用 textContent 输出，message 等用户输入在此处展示也不会造成注入
+    // body 用 textContent 输出，用户输入（如 message / value / text）在此展示也不会造成注入
     var body = document.createElement('pre');
     body.className = 'log-json';
     body.textContent = 'request:\n' + formatJson(entry.request) + '\n\nresponse:\n' + formatJson(entry.response);
@@ -137,29 +153,48 @@
     renderResponse(response);                          // 展示 response；Debug Log 已在 send 内追加
   }
 
-  function bindUi() {
-    var toastBtn = document.getElementById('btn-toast');
-    var deviceBtn = document.getElementById('btn-device');
-    var unknownBtn = document.getElementById('btn-unknown');
-    var messageInput = document.getElementById('toast-message');
+  function bindClick(id, handler) {
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('click', handler);
+  }
 
-    if (toastBtn) {
-      toastBtn.addEventListener('click', function () {
-        var message = messageInput ? messageInput.value.trim() : '';
-        // message 为空时故意不传，触发 toast.show 的 PARAM_ERROR 分支
-        callAction('toast.show', message ? { message: message } : {});
+  function bindUi() {
+    var messageInput = document.getElementById('toast-message');
+    var storageKeyInput = document.getElementById('storage-key');
+    var storageValueInput = document.getElementById('storage-value');
+    var clipboardTextInput = document.getElementById('clipboard-text');
+
+    // 基础能力
+    bindClick('btn-toast', function () {
+      var message = messageInput ? messageInput.value.trim() : '';
+      // message 为空时故意不传，触发 toast.show 的 PARAM_ERROR 分支
+      callAction('toast.show', message ? { message: message } : {});
+    });
+    bindClick('btn-device', function () { callAction('device.info', {}); });
+
+    // 存储能力
+    bindClick('btn-storage-set', function () {
+      callAction('storage.set', {
+        key: storageKeyInput ? storageKeyInput.value.trim() : '',
+        value: storageValueInput ? storageValueInput.value : ''
       });
-    }
-    if (deviceBtn) {
-      deviceBtn.addEventListener('click', function () {
-        callAction('device.info', {});
-      });
-    }
-    if (unknownBtn) {
-      unknownBtn.addEventListener('click', function () {
-        callAction('unknown.action', {});
-      });
-    }
+    });
+    bindClick('btn-storage-get', function () {
+      callAction('storage.get', { key: storageKeyInput ? storageKeyInput.value.trim() : '' });
+    });
+
+    // 系统能力 Mock
+    bindClick('btn-network', function () { callAction('network.status', {}); });
+    bindClick('btn-clipboard', function () {
+      callAction('clipboard.write', { text: clipboardTextInput ? clipboardTextInput.value : '' });
+    });
+
+    // 错误场景
+    bindClick('btn-unknown', function () { callAction('unknown.action', {}); });
+    bindClick('btn-param-error', function () {
+      // 故意只传 key、不传 value -> storage.set 返回 400 PARAM_ERROR
+      callAction('storage.set', { key: (storageKeyInput && storageKeyInput.value.trim()) || 'username' });
+    });
   }
 
   if (typeof document !== 'undefined') {
