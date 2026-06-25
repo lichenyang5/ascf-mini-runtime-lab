@@ -59,45 +59,60 @@ window.ascfBridge.send({
 
 ## 当前阶段目标
 
-当前处于 **Stage 0：项目初始化**。本阶段只做文档与目录骨架，**不写业务代码**。已完成：
+当前已完成 **Stage 1 / Stage 2 / Stage 3**，正在进入 **Stage 4：Debug Panel**。
 
-- 项目门面 README（本文件）
-- 阶段路线 [docs/00-project-roadmap.md](docs/00-project-roadmap.md)
-- 首篇文档骨架 [docs/01-why-jsbridge.md](docs/01-why-jsbridge.md)
-- 架构图源码与导出图（`docs/diagrams/` + `docs/assets/`）
-- 各模块目录骨架：`h5-demo/`、`bridge-core/`、`ability-plugins/`、`debug-panel/`、`examples/`
+- **Stage 1**：H5 + JavaScript Mock 跑通调用链路（`window.ascfBridge.send` → mock response）。
+- **Stage 2**：抽出 Bridge Core 分层（protocol / errors / registry / dispatcher），`bridge.js` 退为组装层。
+- **Stage 3**：扩展 Ability Plugins，现有 6 个能力：`toast.show` / `device.info` / `storage.set` / `storage.get` / `network.status` / `clipboard.write`。
+- **Stage 4（进行中）**：把 Debug Log 抽成独立旁路观测层 `debug-panel/debugPanel.js`，新增调用统计、已注册 action 展示、复制 request/response。
 
-下一步是 **Stage 1**：用 H5 + JavaScript Mock 把上面的调用链路真正跑通。
+整套 demo 仍保持**浏览器直接打开 `h5-demo/index.html` 即可运行**，无需安装任何依赖。
 
 ## 目录结构
 
 ```txt
 ascf-mini-runtime-lab/
-├── README.md                 项目门面
-├── skill.md                  开发约束 / AI 协作规范
-├── docs/                     学习文档
-│   ├── 00-project-roadmap.md 阶段路线
-│   ├── 01-why-jsbridge.md    为什么需要 JSBridge（骨架）
-│   ├── assets/               架构图等静态资源
-│   │   └── runtime-architecture.png
-│   └── diagrams/             图源码
-│       └── runtime-architecture.mmd
-├── h5-demo/                  H5 演示页（规划中）
-├── bridge-core/              协议 / 注册表 / 分发器 / 错误码（规划中）
-├── ability-plugins/          toast / storage / device / network（规划中）
-├── debug-panel/              调试面板（规划中）
-└── examples/                 basic-call / unknown-action / param-error（规划中）
+├── README.md                          项目门面
+├── skill.md                           开发约束 / AI 协作规范
+├── docs/                              学习文档（00 路线图 + 01~06 专题 + 架构图）
+│   ├── 00-project-roadmap.md
+│   ├── 01-why-jsbridge.md
+│   ├── 02-bridge-protocol.md
+│   ├── 03-ability-registry.md
+│   ├── 04-dispatch-flow.md
+│   ├── 05-ability-plugins.md
+│   ├── 06-debug-panel.md
+│   ├── assets/runtime-architecture.png
+│   └── diagrams/runtime-architecture.mmd
+├── h5-demo/                           H5 演示页（浏览器可直接打开）
+│   ├── index.html
+│   ├── bridge.js                      组装层：装配 registry + send + 绑定 UI
+│   └── style.css
+├── bridge-core/                       可复用桥接核心
+│   ├── protocol/bridgeProtocol.js     校验 / 统一 request·response
+│   ├── errors/bridgeErrors.js         统一错误码
+│   ├── registry/abilityRegistry.js    action -> ability 注册表
+│   └── dispatcher/bridgeDispatcher.js 校验 → 查找 → 调用 → 包装
+├── ability-plugins/                   Mock Native 能力
+│   ├── toast/toastAbility.js          toast.show
+│   ├── device/deviceAbility.js        device.info
+│   ├── storage/storageAbility.js      storage.set + storage.get
+│   ├── network/networkAbility.js      network.status
+│   └── clipboard/clipboardAbility.js  clipboard.write
+├── debug-panel/                       旁路观测层
+│   └── debugPanel.js                  日志 / 统计 / 已注册 action / 复制
+└── examples/                          （规划中）basic-call / unknown-action / param-error
 ```
 
 ## 开发路线
 
 | 阶段 | 主题 | 状态 |
 | --- | --- | --- |
-| Stage 0 | 项目初始化（文档 + 目录骨架） | 🔄 进行中 |
-| Stage 1 | H5 Mock 跑通 | ⏳ |
-| Stage 2 | Bridge Core（协议 / 注册表 / 分发器） | ⏳ |
-| Stage 3 | Ability Plugins | ⏳ |
-| Stage 4 | Debug Panel | ⏳ |
+| Stage 0 | 项目初始化（文档 + 目录骨架） | ✅ |
+| Stage 1 | H5 Mock 跑通 | ✅ |
+| Stage 2 | Bridge Core（协议 / 注册表 / 分发器） | ✅ |
+| Stage 3 | Ability Plugins | ✅ |
+| Stage 4 | Debug Panel | 🔄 进行中 |
 | Stage 5 | ArkTS WebView Container | ⏳ |
 | Stage 6 | Offline Package Demo | ⏳ |
 | Stage 7 | 文档与简历化 | ⏳ |

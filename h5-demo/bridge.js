@@ -3,21 +3,25 @@
 /*
  * ASCF Mini Runtime Lab — h5-demo/bridge.js（组装层 / H5 Demo Layer）
  *
- * 分层（Stage 2 起）：
+ * 分层：
  *   H5 Demo Layer（本文件）
  *     -> Bridge Protocol     bridge-core/protocol/bridgeProtocol.js
  *     -> Bridge Dispatcher   bridge-core/dispatcher/bridgeDispatcher.js
  *     -> Ability Registry    bridge-core/registry/abilityRegistry.js
- *     -> Ability Plugin      ability-plugins/<toast|device|storage|network|clipboard>/...
+ *     -> Ability Plugin      ability-plugins/<...>/...
  *     -> Unified Response    protocol.createSuccessResponse / createErrorResponse
  *
- * 本文件只负责：构造 request、组装 registry、暴露 window.ascfBridge.send、记录 Debug Log、绑定 UI。
- * 不包含任何具体能力的业务逻辑——业务都在 ability-plugins 里。
+ * 本文件只负责：构造 request、组装 registry、暴露 window.ascfBridge.send、
+ * 展示当前 Request / Response、绑定按钮。
+ *
+ * 调试日志的「记录与渲染」已从本文件移出，交给旁路观测层 window.DebugPanel
+ * （debug-panel/debugPanel.js）。本文件只在 send 完成后构造 entry 并 DebugPanel.record(entry)。
  */
 (function (global) {
-  // 依赖 bridge-core / ability-plugins 已先于本文件加载（见 index.html 的 script 顺序）
+  // 依赖 bridge-core / ability-plugins / debug-panel 已先于本文件加载（见 index.html 的 script 顺序）
   var BridgeCore = global.BridgeCore;
   var AbilityPlugins = global.AbilityPlugins;
+  var DebugPanel = global.DebugPanel;
 
   /* ---- 1. 组装：创建注册表并注册能力 ---- */
   var registry = new BridgeCore.AbilityRegistry();
@@ -61,7 +65,8 @@
   }
 
   /* ---- 3. 桥接层：window.ascfBridge.send ---- */
-  // 模拟容器里 H5 -> Native -> H5 的异步往返；具体分发交给 bridge-core 的 dispatcher。
+  // 模拟容器里 H5 -> Native -> H5 的异步往返；分发交给 bridge-core，
+  // 记录交给 DebugPanel（本文件不再渲染日志）。
   global.ascfBridge = {
     send: function (request) {
       var startedAt = nowMs();
@@ -70,7 +75,20 @@
         setTimeout(function () {
           var response = BridgeCore.dispatchBridgeRequest(request, registry);
           var duration = Math.round((nowMs() - startedAt) * 100) / 100;
-          recordDebugLog(request, response, duration);
+
+          // 组装一条调试 entry，交给旁路观测层记录
+          var entry = {
+            id: request.id,
+            action: request.action,
+            request: request,
+            response: response,
+            duration: duration,
+            code: response.code,
+            msg: response.msg,
+            timestamp: Date.now()
+          };
+          if (DebugPanel) DebugPanel.record(entry);
+
           resolve(response);
         }, mockLatency);
       });
@@ -81,25 +99,7 @@
     return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
   }
 
-  /* ---- 4. Debug Log ---- */
-  var debugLogs = [];
-
-  function recordDebugLog(request, response, duration) {
-    var entry = {
-      id: request.id,
-      action: request.action,
-      request: request,
-      response: response,
-      duration: duration,
-      code: response.code,
-      msg: response.msg
-    };
-    debugLogs.push(entry);
-    renderDebugLogEntry(entry);
-    return entry;
-  }
-
-  /* ---- 5. 视图层 ---- */
+  /* ---- 4. 当前 Request / Response 展示（仍由组装层负责）---- */
   function formatJson(value) {
     return JSON.stringify(value, null, 2);
   }
@@ -114,43 +114,12 @@
     if (el) el.textContent = formatJson(response);
   }
 
-  function renderDebugLogEntry(entry) {
-    var container = document.getElementById('debug-log');
-    if (!container) return;
-
-    var emptyHint = container.querySelector('.empty-hint');
-    if (emptyHint) emptyHint.remove();
-
-    var ok = entry.code === BridgeCore.ERROR_CODE.SUCCESS;
-
-    var item = document.createElement('div');
-    item.className = 'log-item ' + (ok ? 'log-ok' : 'log-error');
-
-    // head 只用程序内可控字段（id / action / code / msg / duration），不含用户输入
-    var head = document.createElement('div');
-    head.className = 'log-head';
-    head.innerHTML =
-      '<span class="log-id">' + entry.id + '</span>' +
-      '<span class="log-action">' + entry.action + '</span>' +
-      '<span class="log-pill ' + (ok ? 'pill-ok' : 'pill-error') + '">' + entry.code + ' ' + entry.msg + '</span>' +
-      '<span class="log-duration">' + entry.duration + ' ms</span>';
-
-    // body 用 textContent 输出，用户输入（如 message / value / text）在此展示也不会造成注入
-    var body = document.createElement('pre');
-    body.className = 'log-json';
-    body.textContent = 'request:\n' + formatJson(entry.request) + '\n\nresponse:\n' + formatJson(entry.response);
-
-    item.appendChild(head);
-    item.appendChild(body);
-    container.insertBefore(item, container.firstChild);
-  }
-
-  /* ---- 6. 入口：构造调用 + 绑定按钮 ---- */
+  /* ---- 5. 入口：构造调用 + 绑定按钮 ---- */
   async function callAction(action, params) {
     var request = createRequest(action, params);
     renderRequest(request);                            // 立即展示本次 request（H5 侧发出）
-    var response = await global.ascfBridge.send(request); // 等待 Native 回灌
-    renderResponse(response);                          // 展示 response；Debug Log 已在 send 内追加
+    var response = await global.ascfBridge.send(request); // 等待 Native 回灌（DebugPanel 已记录）
+    renderResponse(response);                          // 展示本次 response
   }
 
   function bindClick(id, handler) {
@@ -159,6 +128,16 @@
   }
 
   function bindUi() {
+    // 初始化旁路观测层，并把"当前已注册 action 列表"喂给它（不写死在 HTML）
+    if (DebugPanel) {
+      DebugPanel.init({
+        logContainerId: 'debug-log',
+        statsContainerId: 'debug-stats',
+        actionsContainerId: 'registered-actions'
+      });
+      DebugPanel.setRegisteredActions(registry.listActions());
+    }
+
     var messageInput = document.getElementById('toast-message');
     var storageKeyInput = document.getElementById('storage-key');
     var storageValueInput = document.getElementById('storage-value');
@@ -167,7 +146,6 @@
     // 基础能力
     bindClick('btn-toast', function () {
       var message = messageInput ? messageInput.value.trim() : '';
-      // message 为空时故意不传，触发 toast.show 的 PARAM_ERROR 分支
       callAction('toast.show', message ? { message: message } : {});
     });
     bindClick('btn-device', function () { callAction('device.info', {}); });
@@ -195,6 +173,9 @@
       // 故意只传 key、不传 value -> storage.set 返回 400 PARAM_ERROR
       callAction('storage.set', { key: (storageKeyInput && storageKeyInput.value.trim()) || 'username' });
     });
+
+    // 清空 Debug Log（统计随之归零）
+    bindClick('btn-clear-log', function () { if (DebugPanel) DebugPanel.clear(); });
   }
 
   if (typeof document !== 'undefined') {

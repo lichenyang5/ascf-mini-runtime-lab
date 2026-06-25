@@ -68,10 +68,11 @@ H5 Button
 - **验收**：每个 ability 独立文件 + 说明文档 + 错误场景。
 - **进展**：在 Stage 2 分层上新增 `storage.set` / `storage.get`（localStorage Mock）、`network.status`、`clipboard.write`，连同既有 `toast.show` / `device.info` 共 6 个能力。全部只通过「新建 ability 文件 + 在组装层 `register`」接入，dispatcher / protocol / registry 未改动。`index.html` 按能力分类（基础 / 存储 / 系统 Mock / 错误场景）。配套文档 [05-ability-plugins.md](05-ability-plugins.md)。
 
-### Stage 4 · Debug Panel — ⏳
+### Stage 4 · Debug Panel — 🔄 进行中
 
 - **目标**：展示 request / response / duration / 错误码，支持复制 request JSON。
 - **验收**：页面能看到完整调用链路，清楚看到 H5 发了什么、Native Mock 返回了什么。
+- **进展**：已把 Debug Log 从 `h5-demo/bridge.js` 抽成独立的旁路观测层 `debug-panel/debugPanel.js`（`window.DebugPanel`：init / record / clear / getLogs / render / setRegisteredActions）。新增 Debug Stats（总数/成功/失败/最近错误）、Registered Actions（由 `registry.listActions()` 喂入，不写死）、每条日志可复制 request/response。`bridge.js` 退为「产出 entry → DebugPanel.record」。配套文档 [06-debug-panel.md](06-debug-panel.md)。
 
 ### Stage 5 · ArkTS WebView Container — ⏳
 
@@ -97,7 +98,7 @@ H5 Button
 | **Task 1** | 初始化文档骨架：`README.md` / `docs/00-project-roadmap.md` / `docs/01-why-jsbridge.md` / `docs/diagrams/runtime-architecture.mmd` | ✅ 已完成 |
 | Task 2 | 创建 H5 Demo：`h5-demo/index.html` / `bridge.js` / `style.css`，假的 `window.ascfBridge.send` | ✅ 已完成 |
 | Task 3 | 抽出 Bridge Core：`protocol` / `registry` / `dispatcher` | ✅ 已完成 |
-| Task 4 | 加 Debug Log：每次请求/响应生成日志、记录耗时、页面展示 | ⏳ |
+| Task 4 | 加 Debug Log：每次请求/响应生成日志、记录耗时、页面展示 | ✅ 已完成（升级为独立 Debug Panel） |
 | Task 5 | 写第一篇文档：完善 `docs/01-why-jsbridge.md` | ⏳ |
 
 > Task 1 仅写「项目构思与路线」，不写业务代码。
@@ -115,7 +116,8 @@ H5 Button
 | `03-ability-registry.md` | 能力注册表 | Stage 2/3 | ✅ |
 | `04-dispatch-flow.md` | 分发流程 | Stage 2 | ✅ |
 | `05-ability-plugins.md` | 能力插件化（含常见错误） | Stage 3 | ✅ |
-| `06-offline-package.md` | 离线包 | Stage 6 | ⏳ |
+| `06-debug-panel.md` | Debug Panel | Stage 4 | ✅ |
+| `07-offline-package.md` | 离线包 | Stage 6 | ⏳ |
 | `diagrams/bridge-sequence.mmd` | 调用时序图 | Stage 2/4 | ⏳ |
 
 ---

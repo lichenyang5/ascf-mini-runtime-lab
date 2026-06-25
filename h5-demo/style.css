@@ -168,6 +168,60 @@ body {
   overflow-x: auto;
 }
 
+/* ---- Debug Panel ---- */
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.card-title-row .card-title { margin: 0; }
+
+.subsection-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-weak);
+  letter-spacing: .02em;
+  margin: 14px 0 8px;
+}
+
+.btn-ghost { background: transparent; }
+.btn-xs { padding: 4px 10px; font-size: 12px; border-radius: 8px; }
+
+/* Stats：指标卡 */
+.debug-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+@media (max-width: 560px) { .debug-stats { grid-template-columns: repeat(2, 1fr); } }
+.metric {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.metric-value { font-size: 20px; font-weight: 700; line-height: 1.2; word-break: break-word; }
+.metric-label { font-size: 12px; color: var(--text-weak); margin-top: 2px; }
+.metric-ok .metric-value { color: var(--ok); }
+.metric-error .metric-value { color: var(--danger); }
+
+/* Registered Actions：chip 标签 */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--primary);
+  background: rgba(51, 112, 255, .10);
+  border: 1px solid rgba(51, 112, 255, .20);
+  border-radius: 999px;
+  padding: 3px 10px;
+}
+
+/* Debug Log：单条记录的时间与操作区 */
+.log-time { color: var(--text-weak); font-family: var(--mono); font-size: 12px; }
+.log-actions { display: flex; gap: 8px; margin-bottom: 8px; }
+
 .app-footer {
   margin-top: 24px;
   text-align: center;
