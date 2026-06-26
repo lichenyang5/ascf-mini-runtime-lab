@@ -59,15 +59,21 @@ window.ascfBridge.send({
 
 ## 当前阶段目标
 
-当前已完成 **Stage 1 / Stage 2 / Stage 3 / Stage 4**，正在进入 **Stage 5：Runtime Engine**。
+当前已完成 **Stage 1 / Stage 2 / Stage 3 / Stage 4 / Stage 5.1（Runtime Engine 骨架）/ Stage 5.2（Ability Monitor）**，Stage 5 整体进行中（待补 PerformanceMonitor / Timeline 等扩展）。
 
 - **Stage 1**：H5 + JavaScript Mock 跑通调用链路（`window.ascfBridge.send` → mock response）。
 - **Stage 2**：抽出 Bridge Core 分层（protocol / errors / registry / dispatcher）。
 - **Stage 3**：扩展 Ability Plugins，6 个能力：`toast.show` / `device.info` / `storage.set` / `storage.get` / `network.status` / `clipboard.write`。
 - **Stage 4**：把 Debug Log 抽成独立旁路观测层 `debug-panel/debugPanel.js`（统计、Registered Actions、复制）。
-- **Stage 5（进行中）**：新增 `runtime/` 层（Runtime / RuntimeState / EventBus），把"装配 + 调度 + 观测 + 状态 + 事件"收拢到 Runtime 入口；`bridge.js` 回归 H5 Demo 组装层，只剩按钮绑定与 Request/Response 展示。
+- **Stage 5.1**：新增 `runtime/` 层（Runtime / RuntimeState / EventBus），把"装配 + 调度 + 观测 + 状态 + 事件"收拢到 Runtime；`bridge.js` 回归 H5 Demo 组装层。
+- **Stage 5.2（最新）**：新增 `runtime/AbilityMonitor.js`，作为 EventBus 订阅者按 action 维度累计统计（total / success / failure / 平均·最大耗时 / 最近 code·msg），与 DebugPanel 互补：DebugPanel 看单次账单，AbilityMonitor 看能力报表。
 
-整套 demo 仍保持**浏览器直接打开 `h5-demo/index.html` 即可运行**，无需安装任何依赖。控制台可用 `MiniRuntimeDevtools.getState()` 查看运行时快照。
+整套 demo 仍保持**浏览器直接打开 `h5-demo/index.html` 即可运行**（或通过 Live Server / 本地 http）。控制台可用：
+```js
+MiniRuntimeDevtools.getState()                                // Runtime 状态快照
+MiniRuntimeDevtools.getLogs()                                 // DebugPanel 当前日志
+MiniRuntimeDevtools.runtime.getAbilityMonitor().getStats()    // AbilityMonitor 统计数组
+```
 
 ## 目录结构
 
@@ -103,9 +109,10 @@ ascf-mini-runtime-lab/
 ├── debug-panel/                       旁路观测层
 │   └── debugPanel.js                  日志 / 统计 / 已注册 action / 复制
 ├── runtime/                           Mini Runtime 统一入口
-│   ├── Runtime.js                     装配 Registry/Dispatcher/DebugPanel/State/EventBus
+│   ├── Runtime.js                     装配 Registry/Dispatcher/DebugPanel/State/EventBus/Monitor
 │   ├── RuntimeState.js                运行时状态 + snapshot
-│   └── EventBus.js                    runtime / request / ability 事件总线
+│   ├── EventBus.js                    runtime / request / ability 事件总线
+│   └── AbilityMonitor.js              按 action 维度累计统计（EventBus 订阅者）
 └── examples/                          （规划中）basic-call / unknown-action / param-error
 ```
 
@@ -118,7 +125,7 @@ ascf-mini-runtime-lab/
 | Stage 2 | Bridge Core（协议 / 注册表 / 分发器） | ✅ |
 | Stage 3 | Ability Plugins | ✅ |
 | Stage 4 | Debug Panel | ✅ |
-| Stage 5 | Runtime Engine（统一入口 / State / EventBus） | 🚧 进行中 |
+| Stage 5 | Runtime Engine（统一入口 / State / EventBus / AbilityMonitor） | 🚧 进行中 |
 | Stage 6 | ArkTS WebView Container | ⏳ |
 | Stage 7 | Offline Package / 文档简历化 | ⏳ |
 

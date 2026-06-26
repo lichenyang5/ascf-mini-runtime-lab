@@ -105,6 +105,15 @@
       </div>
     </section>
 
+    <!-- Ability Monitor：EventBus 订阅者，按 action 维度做累计统计（runtime/AbilityMonitor.js 渲染） -->
+    <section class="card">
+      <h2 class="card-title">Ability Monitor</h2>
+      <p class="ability-monitor-hint">按 action 维度统计：total / success / failure / 平均·最大耗时 / 最近 code·msg。</p>
+      <div id="ability-monitor">
+        <p class="empty-hint">暂无能力调用统计。</p>
+      </div>
+    </section>
+
     <footer class="app-footer">
       纯前端 Mock Demo · 不调用任何真实系统能力 · 仅用于理解 H5 → Bridge → Mock Ability → Response 闭环
     </footer>
@@ -126,6 +135,7 @@
   <!-- Stage 5.1：Runtime 统一入口（State -> EventBus -> Runtime，bridge.js 退为组装层） -->
   <script src="../runtime/RuntimeState.js"></script>
   <script src="../runtime/EventBus.js"></script>
+  <script src="../runtime/AbilityMonitor.js"></script>
   <script src="../runtime/Runtime.js"></script>
   <script src="./bridge.js"></script>
 </body>

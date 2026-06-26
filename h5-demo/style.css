@@ -222,6 +222,49 @@ body {
 .log-time { color: var(--text-weak); font-family: var(--mono); font-size: 12px; }
 .log-actions { display: flex; gap: 8px; margin-bottom: 8px; }
 
+/* ---- Ability Monitor ---- */
+.ability-monitor-hint {
+  margin: 0 0 12px;
+  color: var(--text-weak);
+  font-size: 12px;
+}
+.ability-monitor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  background: var(--card-bg);
+}
+.ability-monitor-table th,
+.ability-monitor-table td {
+  border-bottom: 1px solid var(--border);
+  padding: 8px 10px;
+  text-align: right;
+  white-space: nowrap;
+}
+.ability-monitor-table th {
+  font-weight: 600;
+  color: var(--text-weak);
+  font-size: 12px;
+  letter-spacing: .02em;
+  text-align: right;
+  background: var(--code-bg);
+}
+.ability-monitor-table th:first-child,
+.ability-monitor-table td:first-child { text-align: left; }
+.ability-monitor-table tbody tr:last-child td { border-bottom: none; }
+.ability-monitor-table .mono {
+  font-family: var(--mono);
+  font-size: 12px;
+}
+.ability-monitor-table .num-ok { color: var(--ok); font-weight: 600; }
+.ability-monitor-table .num-error { color: var(--danger); font-weight: 600; }
+.ability-monitor-table .num-muted { color: var(--text-weak); }
+.ability-monitor-table .row-has-failure { background: rgba(245, 74, 69, .04); }
+@media (max-width: 640px) {
+  .ability-monitor-table { font-size: 12px; }
+  .ability-monitor-table th, .ability-monitor-table td { padding: 6px 8px; }
+}
+
 .app-footer {
   margin-top: 24px;
   text-align: center;

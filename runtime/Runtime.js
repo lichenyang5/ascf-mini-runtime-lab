@@ -35,6 +35,10 @@
     var state = global.RuntimeState.createRuntimeState({ version: protocolVersion });
     var events = global.RuntimeEventBus.createEventBus();
     var registry = new bridgeCore.AbilityRegistry();
+    // EventBus 上的旁路观测者，按 action 维度统计调用情况；不参与主链路分发
+    var abilityMonitor = global.AbilityMonitor
+      ? global.AbilityMonitor.createAbilityMonitor()
+      : null;
 
     var requestSeq = 0;
     function generateRequestId() {
@@ -149,10 +153,19 @@
         }
       }
 
+      // 接 AbilityMonitor 到 EventBus，并把它绑定到页面容器（首渲染 + 后续自动刷新）
+      if (abilityMonitor) {
+        abilityMonitor.attach(events);
+        if (typeof abilityMonitor.render === 'function') {
+          abilityMonitor.render('ability-monitor');
+        }
+      }
+
       events.emit('runtime:started', state.snapshot());
     }
 
     function stop() {
+      if (abilityMonitor) abilityMonitor.detach();
       state.stop();
       events.emit('runtime:stopped', state.snapshot());
     }
@@ -160,6 +173,7 @@
     function getStateSnapshot() { return state.snapshot(); }
     function getRegistry() { return registry; }
     function getEvents() { return events; }
+    function getAbilityMonitor() { return abilityMonitor; }
 
     return {
       // 生命周期
@@ -175,7 +189,8 @@
       // 自省（给 devtools / 文档用）
       getStateSnapshot: getStateSnapshot,
       getRegistry: getRegistry,
-      getEvents: getEvents
+      getEvents: getEvents,
+      getAbilityMonitor: getAbilityMonitor
     };
   }
 

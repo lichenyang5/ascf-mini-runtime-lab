@@ -76,9 +76,13 @@ H5 Button
 
 ### Stage 5 · Runtime Engine — 🚧 进行中
 
-- **目标**：新增 Runtime 统一入口、RuntimeState、EventBus；`bridge.js` 从"总管"变成 H5 Demo 组装层；为后续 AbilityMonitor / PerformanceMonitor / ArkTS WebView Container 做准备。
-- **验收**：浏览器直接打开 `index.html` 能跑通所有已有能力；调用走 `runtime.dispatch`；`bridge.js` 中不再有 `new AbilityRegistry` / `BridgeCore.dispatchBridgeRequest` 等装配语句；控制台可通过 `MiniRuntimeDevtools.getState()` 看到 runtime 快照。
-- **进展**：新增 `runtime/RuntimeState.js`（状态 + 浅拷贝读取）、`runtime/EventBus.js`（极简事件总线，约定 6 个事件名）、`runtime/Runtime.js`（统一入口，方法 start/stop/registerAbility/registerAbilities/createRequest/dispatch/call/getStateSnapshot）。`bridge.js` 大幅瘦身，只剩按钮绑定与当前 Request/Response 展示。配套文档 [07-runtime-engine.md](07-runtime-engine.md)。
+- **目标**：新增 Runtime 统一入口、RuntimeState、EventBus、AbilityMonitor；`bridge.js` 从"总管"变成 H5 Demo 组装层；为后续 PerformanceMonitor / ArkTS WebView Container 做准备。
+- **子任务**：
+  - **5.1 Runtime Engine 骨架** — ✅
+    新增 `runtime/RuntimeState.js`、`runtime/EventBus.js`、`runtime/Runtime.js`（start/stop/registerAbility(ies)/createRequest/dispatch/call/getStateSnapshot）。`bridge.js` 退为组装层。配套文档 [07-runtime-engine.md](07-runtime-engine.md)。
+  - **5.2 Ability Monitor** — ✅
+    新增 `runtime/AbilityMonitor.js`，订阅 EventBus 的 `request:finished` / `request:error`，按 action 维度累计 total / success / failure / avgDuration / maxDuration / lastCode / lastMsg / lastCalledAt；Runtime 在 `start()` 时 attach 并渲染到 `#ability-monitor`，`stop()` 时 detach；新增 `runtime.getAbilityMonitor()`。配套文档 [08-ability-monitor.md](08-ability-monitor.md)。
+- **验收**：浏览器或本地 server 打开 `index.html` 能跑通所有能力；调用走 `runtime.dispatch`；`MiniRuntimeDevtools.runtime.getAbilityMonitor().getStats()` 能拿到统计数组；Ability Monitor 表格随调用刷新。
 
 ### Stage 6 · ArkTS WebView Container — ⏳
 
@@ -118,8 +122,9 @@ H5 Button
 | `04-dispatch-flow.md` | 分发流程 | Stage 2 | ✅ |
 | `05-ability-plugins.md` | 能力插件化（含常见错误） | Stage 3 | ✅ |
 | `06-debug-panel.md` | Debug Panel | Stage 4 | ✅ |
-| `07-runtime-engine.md` | Runtime Engine（统一入口） | Stage 5 | ✅ |
-| `08-offline-package.md` | 离线包 | Stage 7 | ⏳ |
+| `07-runtime-engine.md` | Runtime Engine（统一入口） | Stage 5.1 | ✅ |
+| `08-ability-monitor.md` | Ability Monitor（按能力累计统计） | Stage 5.2 | ✅ |
+| `09-offline-package.md` | 离线包 | Stage 7 | ⏳ |
 | `diagrams/bridge-sequence.mmd` | 调用时序图 | Stage 2/4 | ⏳ |
 
 ---
