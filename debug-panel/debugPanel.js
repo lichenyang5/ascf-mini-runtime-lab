@@ -48,7 +48,7 @@
 
   function setRegisteredActions(actions) {
     state.registeredActions = Array.isArray(actions) ? actions.slice() : [];
-    renderActions();
+    render();
   }
 
   function render() {
@@ -74,11 +74,16 @@
     el.appendChild(metricCard('总调用', total, ''));
     el.appendChild(metricCard('成功', success, 'ok'));
     el.appendChild(metricCard('失败', fail, fail > 0 ? 'error' : ''));
-    el.appendChild(metricCard(
-      lastError ? ('最近错误 · ' + lastError.action) : '最近错误',
-      lastError ? lastError.msg : '—',
-      lastError ? 'error' : ''
-    ));
+    // 最近一次错误：无错误时显示「暂无错误」；有错误时同时展示 action + code + msg
+    if (lastError) {
+      el.appendChild(metricCard(
+        lastError.action + ' · ' + lastError.code,
+        lastError.msg,
+        'error'
+      ));
+    } else {
+      el.appendChild(metricCard('最近错误', '暂无错误', ''));
+    }
   }
 
   function metricCard(label, value, tone) {

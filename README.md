@@ -59,14 +59,15 @@ window.ascfBridge.send({
 
 ## 当前阶段目标
 
-当前已完成 **Stage 1 / Stage 2 / Stage 3**，正在进入 **Stage 4：Debug Panel**。
+当前已完成 **Stage 1 / Stage 2 / Stage 3 / Stage 4**，正在进入 **Stage 5：Runtime Engine**。
 
 - **Stage 1**：H5 + JavaScript Mock 跑通调用链路（`window.ascfBridge.send` → mock response）。
-- **Stage 2**：抽出 Bridge Core 分层（protocol / errors / registry / dispatcher），`bridge.js` 退为组装层。
-- **Stage 3**：扩展 Ability Plugins，现有 6 个能力：`toast.show` / `device.info` / `storage.set` / `storage.get` / `network.status` / `clipboard.write`。
-- **Stage 4（进行中）**：把 Debug Log 抽成独立旁路观测层 `debug-panel/debugPanel.js`，新增调用统计、已注册 action 展示、复制 request/response。
+- **Stage 2**：抽出 Bridge Core 分层（protocol / errors / registry / dispatcher）。
+- **Stage 3**：扩展 Ability Plugins，6 个能力：`toast.show` / `device.info` / `storage.set` / `storage.get` / `network.status` / `clipboard.write`。
+- **Stage 4**：把 Debug Log 抽成独立旁路观测层 `debug-panel/debugPanel.js`（统计、Registered Actions、复制）。
+- **Stage 5（进行中）**：新增 `runtime/` 层（Runtime / RuntimeState / EventBus），把"装配 + 调度 + 观测 + 状态 + 事件"收拢到 Runtime 入口；`bridge.js` 回归 H5 Demo 组装层，只剩按钮绑定与 Request/Response 展示。
 
-整套 demo 仍保持**浏览器直接打开 `h5-demo/index.html` 即可运行**，无需安装任何依赖。
+整套 demo 仍保持**浏览器直接打开 `h5-demo/index.html` 即可运行**，无需安装任何依赖。控制台可用 `MiniRuntimeDevtools.getState()` 查看运行时快照。
 
 ## 目录结构
 
@@ -101,6 +102,10 @@ ascf-mini-runtime-lab/
 │   └── clipboard/clipboardAbility.js  clipboard.write
 ├── debug-panel/                       旁路观测层
 │   └── debugPanel.js                  日志 / 统计 / 已注册 action / 复制
+├── runtime/                           Mini Runtime 统一入口
+│   ├── Runtime.js                     装配 Registry/Dispatcher/DebugPanel/State/EventBus
+│   ├── RuntimeState.js                运行时状态 + snapshot
+│   └── EventBus.js                    runtime / request / ability 事件总线
 └── examples/                          （规划中）basic-call / unknown-action / param-error
 ```
 
@@ -112,10 +117,10 @@ ascf-mini-runtime-lab/
 | Stage 1 | H5 Mock 跑通 | ✅ |
 | Stage 2 | Bridge Core（协议 / 注册表 / 分发器） | ✅ |
 | Stage 3 | Ability Plugins | ✅ |
-| Stage 4 | Debug Panel | 🔄 进行中 |
-| Stage 5 | ArkTS WebView Container | ⏳ |
-| Stage 6 | Offline Package Demo | ⏳ |
-| Stage 7 | 文档与简历化 | ⏳ |
+| Stage 4 | Debug Panel | ✅ |
+| Stage 5 | Runtime Engine（统一入口 / State / EventBus） | 🚧 进行中 |
+| Stage 6 | ArkTS WebView Container | ⏳ |
+| Stage 7 | Offline Package / 文档简历化 | ⏳ |
 
 详见 [docs/00-project-roadmap.md](docs/00-project-roadmap.md)。
 

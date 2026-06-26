@@ -1,43 +1,31 @@
 'use strict';
 
 /*
- * ASCF Mini Runtime Lab — h5-demo/bridge.js（组装层 / H5 Demo Layer）
+ * ASCF Mini Runtime Lab — h5-demo/bridge.js（H5 Demo 组装层）
  *
- * 分层：
- *   H5 Demo Layer（本文件）
- *     -> Bridge Protocol     bridge-core/protocol/bridgeProtocol.js
- *     -> Bridge Dispatcher   bridge-core/dispatcher/bridgeDispatcher.js
- *     -> Ability Registry    bridge-core/registry/abilityRegistry.js
- *     -> Ability Plugin      ability-plugins/<...>/...
- *     -> Unified Response    protocol.createSuccessResponse / createErrorResponse
+ * 自 Stage 5.1 起，所有"装配 + 调度 + 调试记录 + 事件"都搬到了 runtime/Runtime.js。
+ * 本文件只剩 H5 Demo 自己的事：
+ *   1. 创建 runtime、把 ability 数组喂进去、启动 runtime
+ *   2. 暴露 window.ascfBridge.send（薄薄一层，转交 runtime.dispatch）
+ *   3. 读取输入框、绑定按钮、调用 runtime.call(action, params)
+ *   4. 展示本次 Request / Response（Debug Log/Stats/Actions 由 DebugPanel 自渲染）
  *
- * 本文件只负责：构造 request、组装 registry、暴露 window.ascfBridge.send、
- * 展示当前 Request / Response、绑定按钮。
- *
- * 调试日志的「记录与渲染」已从本文件移出，交给旁路观测层 window.DebugPanel
- * （debug-panel/debugPanel.js）。本文件只在 send 完成后构造 entry 并 DebugPanel.record(entry)。
+ * 不再做：new AbilityRegistry、registerAll、维护 debugLogs、renderLog 等。
  */
 (function (global) {
-  // 依赖 bridge-core / ability-plugins / debug-panel 已先于本文件加载（见 index.html 的 script 顺序）
   var BridgeCore = global.BridgeCore;
   var AbilityPlugins = global.AbilityPlugins;
   var DebugPanel = global.DebugPanel;
+  var MiniRuntime = global.MiniRuntime;
 
-  /* ---- 1. 组装：创建注册表并注册能力 ---- */
-  var registry = new BridgeCore.AbilityRegistry();
+  /* ---- 1. 创建并启动 runtime ---- */
+  var runtime = MiniRuntime.createRuntime({
+    protocolVersion: '1.0.0',
+    bridgeCore: BridgeCore,
+    debugPanel: DebugPanel
+  });
 
-  // 支持「单个 ability」或「一个文件导出的 ability 数组」（如 storage）
-  function registerAll(items) {
-    items.forEach(function (item) {
-      if (!item) return; // 容错：某 ability 脚本未加载时跳过，不连累其他能力
-      var list = Array.isArray(item) ? item : [item];
-      list.forEach(function (ability) {
-        if (ability && ability.action) registry.register(ability.action, ability);
-      });
-    });
-  }
-
-  registerAll([
+  runtime.registerAbilities([
     AbilityPlugins.toastAbility,        // toast.show
     AbilityPlugins.deviceAbility,       // device.info
     AbilityPlugins.storageAbilities,    // storage.set + storage.get（数组）
@@ -45,81 +33,29 @@
     AbilityPlugins.clipboardAbility     // clipboard.write
   ]);
 
-  /* ---- 2. H5 侧请求构造（id / version 由 H5 负责生成）---- */
-  var PROTOCOL_VERSION = '1.0.0';
-  var requestSeq = 0;
-
-  function generateRequestId() {
-    requestSeq += 1;
-    return 'req_' + String(requestSeq).padStart(3, '0');
-  }
-
-  function createRequest(action, params) {
-    return {
-      id: generateRequestId(),
-      version: PROTOCOL_VERSION,
-      action: action,
-      params: params || {},
-      timestamp: Date.now()
-    };
-  }
-
-  /* ---- 3. 桥接层：window.ascfBridge.send ---- */
-  // 模拟容器里 H5 -> Native -> H5 的异步往返；分发交给 bridge-core，
-  // 记录交给 DebugPanel（本文件不再渲染日志）。
+  /* ---- 2. 暴露 window.ascfBridge.send（保持对外接口不变）---- */
   global.ascfBridge = {
     send: function (request) {
-      var startedAt = nowMs();
-      return new Promise(function (resolve) {
-        var mockLatency = 10 + Math.floor(Math.random() * 50); // 模拟 Native 往返耗时(mock)
-        setTimeout(function () {
-          var response = BridgeCore.dispatchBridgeRequest(request, registry);
-          var duration = Math.round((nowMs() - startedAt) * 100) / 100;
-
-          // 组装一条调试 entry，交给旁路观测层记录
-          var entry = {
-            id: request.id,
-            action: request.action,
-            request: request,
-            response: response,
-            duration: duration,
-            code: response.code,
-            msg: response.msg,
-            timestamp: Date.now()
-          };
-          if (DebugPanel) DebugPanel.record(entry);
-
-          resolve(response);
-        }, mockLatency);
-      });
+      return runtime.dispatch(request);
     }
   };
 
-  function nowMs() {
-    return (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
-  }
-
-  /* ---- 4. 当前 Request / Response 展示（仍由组装层负责）---- */
-  function formatJson(value) {
-    return JSON.stringify(value, null, 2);
-  }
-
+  /* ---- 3. 仅 H5 Demo 自己的展示：当前 Request / Response ---- */
+  function formatJson(v) { return JSON.stringify(v, null, 2); }
   function renderRequest(request) {
     var el = document.getElementById('request-view');
     if (el) el.textContent = formatJson(request);
   }
-
   function renderResponse(response) {
     var el = document.getElementById('response-view');
     if (el) el.textContent = formatJson(response);
   }
 
-  /* ---- 5. 入口：构造调用 + 绑定按钮 ---- */
+  /* ---- 4. 入口：构造调用 + 绑定按钮 ---- */
   async function callAction(action, params) {
-    var request = createRequest(action, params);
-    renderRequest(request);                            // 立即展示本次 request（H5 侧发出）
-    var response = await global.ascfBridge.send(request); // 等待 Native 回灌（DebugPanel 已记录）
-    renderResponse(response);                          // 展示本次 response
+    var result = await runtime.call(action, params);
+    renderRequest(result.request);
+    renderResponse(result.response);
   }
 
   function bindClick(id, handler) {
@@ -128,15 +64,7 @@
   }
 
   function bindUi() {
-    // 初始化旁路观测层，并把"当前已注册 action 列表"喂给它（不写死在 HTML）
-    if (DebugPanel) {
-      DebugPanel.init({
-        logContainerId: 'debug-log',
-        statsContainerId: 'debug-stats',
-        actionsContainerId: 'registered-actions'
-      });
-      DebugPanel.setRegisteredActions(registry.listActions());
-    }
+    runtime.start();
 
     var messageInput = document.getElementById('toast-message');
     var storageKeyInput = document.getElementById('storage-key');
@@ -170,13 +98,19 @@
     // 错误场景
     bindClick('btn-unknown', function () { callAction('unknown.action', {}); });
     bindClick('btn-param-error', function () {
-      // 故意只传 key、不传 value -> storage.set 返回 400 PARAM_ERROR
       callAction('storage.set', { key: (storageKeyInput && storageKeyInput.value.trim()) || 'username' });
     });
 
-    // 清空 Debug Log（统计随之归零）
+    // 清空 Debug Log（DebugPanel 自己维护统计）
     bindClick('btn-clear-log', function () { if (DebugPanel) DebugPanel.clear(); });
   }
+
+  /* ---- 5. 调试入口（控制台用）---- */
+  global.MiniRuntimeDevtools = {
+    runtime: runtime,
+    getState: function () { return runtime.getStateSnapshot(); },
+    getLogs: function () { return DebugPanel ? DebugPanel.getLogs() : []; }
+  };
 
   if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {

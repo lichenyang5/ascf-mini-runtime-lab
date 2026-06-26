@@ -68,26 +68,27 @@ H5 Button
 - **验收**：每个 ability 独立文件 + 说明文档 + 错误场景。
 - **进展**：在 Stage 2 分层上新增 `storage.set` / `storage.get`（localStorage Mock）、`network.status`、`clipboard.write`，连同既有 `toast.show` / `device.info` 共 6 个能力。全部只通过「新建 ability 文件 + 在组装层 `register`」接入，dispatcher / protocol / registry 未改动。`index.html` 按能力分类（基础 / 存储 / 系统 Mock / 错误场景）。配套文档 [05-ability-plugins.md](05-ability-plugins.md)。
 
-### Stage 4 · Debug Panel — 🔄 进行中
+### Stage 4 · Debug Panel — ✅ 已完成
 
 - **目标**：展示 request / response / duration / 错误码，支持复制 request JSON。
 - **验收**：页面能看到完整调用链路，清楚看到 H5 发了什么、Native Mock 返回了什么。
 - **进展**：已把 Debug Log 从 `h5-demo/bridge.js` 抽成独立的旁路观测层 `debug-panel/debugPanel.js`（`window.DebugPanel`：init / record / clear / getLogs / render / setRegisteredActions）。新增 Debug Stats（总数/成功/失败/最近错误）、Registered Actions（由 `registry.listActions()` 喂入，不写死）、每条日志可复制 request/response。`bridge.js` 退为「产出 entry → DebugPanel.record」。配套文档 [06-debug-panel.md](06-debug-panel.md)。
 
-### Stage 5 · ArkTS WebView Container — ⏳
+### Stage 5 · Runtime Engine — 🚧 进行中
+
+- **目标**：新增 Runtime 统一入口、RuntimeState、EventBus；`bridge.js` 从"总管"变成 H5 Demo 组装层；为后续 AbilityMonitor / PerformanceMonitor / ArkTS WebView Container 做准备。
+- **验收**：浏览器直接打开 `index.html` 能跑通所有已有能力；调用走 `runtime.dispatch`；`bridge.js` 中不再有 `new AbilityRegistry` / `BridgeCore.dispatchBridgeRequest` 等装配语句；控制台可通过 `MiniRuntimeDevtools.getState()` 看到 runtime 快照。
+- **进展**：新增 `runtime/RuntimeState.js`（状态 + 浅拷贝读取）、`runtime/EventBus.js`（极简事件总线，约定 6 个事件名）、`runtime/Runtime.js`（统一入口，方法 start/stop/registerAbility/registerAbilities/createRequest/dispatch/call/getStateSnapshot）。`bridge.js` 大幅瘦身，只剩按钮绑定与当前 Request/Response 展示。配套文档 [07-runtime-engine.md](07-runtime-engine.md)。
+
+### Stage 6 · ArkTS WebView Container — ⏳
 
 - **目标**：HarmonyOS Web 组件加载 H5，`javaScriptProxy` 暴露 bridge，`runJavaScript` 回调 H5。
 - **验收**：H5 点击 → ArkTS 收到 request → dispatch 返回 response → H5 展示 response。
 
-### Stage 6 · Offline Package Demo — ⏳
+### Stage 7 · Offline Package / 文档简历化 — ⏳
 
-- **目标**：模拟离线包加载、版本号展示、fallback 错误页。
-- **验收**：正常加载本地页面；失败展示错误页；文档解释离线包解决的问题。
-
-### Stage 7 · 文档与简历化 — ⏳
-
-- **目标**：补充架构图、时序图、README 截图、博客与简历描述。
-- **验收**：README 让陌生人看懂；docs 讲清架构；项目可作为求职展示。
+- **目标**：模拟离线包加载、版本号展示、fallback 错误页；补充架构图、时序图、README 截图、博客与简历描述。
+- **验收**：本地包加载成功 / 失败有清晰展示；docs 能讲清架构；项目可作为求职展示。
 
 ---
 
@@ -117,7 +118,8 @@ H5 Button
 | `04-dispatch-flow.md` | 分发流程 | Stage 2 | ✅ |
 | `05-ability-plugins.md` | 能力插件化（含常见错误） | Stage 3 | ✅ |
 | `06-debug-panel.md` | Debug Panel | Stage 4 | ✅ |
-| `07-offline-package.md` | 离线包 | Stage 6 | ⏳ |
+| `07-runtime-engine.md` | Runtime Engine（统一入口） | Stage 5 | ✅ |
+| `08-offline-package.md` | 离线包 | Stage 7 | ⏳ |
 | `diagrams/bridge-sequence.mmd` | 调用时序图 | Stage 2/4 | ⏳ |
 
 ---
