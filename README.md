@@ -52,7 +52,7 @@ window.ascfBridge.send({
 
 ## 架构图
 
-![ASCF Mini Runtime 运行时分层架构图](./docs/assets/runtime-architecture.png)
+![ASCF Mini Runtime 运行时分层架构图](./docs/assets/ASCF双进程通信架构图.png)
 
 > 图片由 [docs/diagrams/runtime-architecture.mmd](docs/diagrams/runtime-architecture.mmd) 渲染导出。
 > 修改架构时请改 `.mmd` 源文件并重新导出 PNG，保持图文一致。
